@@ -6,11 +6,8 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.media.AudioAttributes
-import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.audiofx.Visualizer
-import android.net.Uri
-import android.net.rtp.AudioStream
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -23,13 +20,12 @@ import com.unity3d.player.IUnityPlayerLifecycleEvents
 import com.unity3d.player.MultiWindowSupport
 import com.unity3d.player.UnityPlayer
 import kotlinx.coroutines.*
-import java.lang.StringBuilder
 import java.util.concurrent.atomic.AtomicInteger
 
 class UnityPlayerActivity : AppCompatActivity(), IUnityPlayerLifecycleEvents {
     private lateinit var myUnityPlayer: MyUnityPlayer
     private lateinit var binding: ActivityUnityPlayerBinding
-    private final val TAG: String = UnityPlayerActivity::class.java.simpleName
+    private val TAG: String = UnityPlayerActivity::class.java.simpleName
     private val gameObjectName = "music"
     private val unity3dMethodName = "ControlAnimator"
     private var mediaPlayer: MediaPlayer? = null
@@ -47,6 +43,9 @@ class UnityPlayerActivity : AppCompatActivity(), IUnityPlayerLifecycleEvents {
         playMusic()
         myUnityPlayer = MyUnityPlayer(this, this)
         binding.back.setOnClickListener {
+            finish()
+        }
+        binding.play.setOnClickListener {
             when (type) {
                 // 播放音频
                 1 -> {
@@ -139,7 +138,7 @@ class UnityPlayerActivity : AppCompatActivity(), IUnityPlayerLifecycleEvents {
                         override fun onWaveFormDataCapture(
                             visualizer: Visualizer?,
                             waveform: ByteArray?,
-                            samplingRate: Int
+                            samplingRate: Int,
                         ) {
                             binding.visualizerView.updateVisualizer(waveform)
                         }
@@ -147,7 +146,7 @@ class UnityPlayerActivity : AppCompatActivity(), IUnityPlayerLifecycleEvents {
                         override fun onFftDataCapture(
                             visualizer: Visualizer?,
                             fft: ByteArray?,
-                            samplingRate: Int
+                            samplingRate: Int,
                         ) {
                             TODO("Not yet implemented")
                         }
