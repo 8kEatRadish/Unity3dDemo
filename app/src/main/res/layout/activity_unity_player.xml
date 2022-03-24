@@ -22,16 +22,6 @@
 
         </FrameLayout>
 
-        <Button
-            android:id="@+id/play"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
-            android:text="暂停"
-            app:layout_constraintBottom_toTopOf="@+id/back"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
         <com.eatradish.unitydemo.VisualizerView
             android:id="@+id/visualizer_view"
             android:layout_width="match_parent"

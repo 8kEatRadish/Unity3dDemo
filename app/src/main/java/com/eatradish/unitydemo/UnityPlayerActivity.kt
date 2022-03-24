@@ -5,6 +5,8 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Bitmap.CompressFormat
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.media.audiofx.Visualizer
@@ -20,20 +22,20 @@ import com.unity3d.player.IUnityPlayerLifecycleEvents
 import com.unity3d.player.MultiWindowSupport
 import com.unity3d.player.UnityPlayer
 import kotlinx.coroutines.*
+import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicInteger
+
 
 class UnityPlayerActivity : AppCompatActivity(), IUnityPlayerLifecycleEvents {
     private lateinit var myUnityPlayer: MyUnityPlayer
     private lateinit var binding: ActivityUnityPlayerBinding
     private val TAG: String = UnityPlayerActivity::class.java.simpleName
-    private val gameObjectName = "music"
-    private val unity3dMethodName = "ControlAnimator"
+    private val gameObjectName = "music_ceshi"
+    private val unity3dMethodName = "SetNextLyric"
     private var mediaPlayer: MediaPlayer? = null
     private var visualizer: Visualizer? = null
     private val musicFile = "music/莫文蔚-这世界那么多人.mp3"
     private val musicLrc = "music/莫文蔚-这世界那么多人.lrc"
-
-    private var type = 2
 
     private var line: AtomicInteger = AtomicInteger(-1)
 
@@ -43,25 +45,8 @@ class UnityPlayerActivity : AppCompatActivity(), IUnityPlayerLifecycleEvents {
         playMusic()
         myUnityPlayer = MyUnityPlayer(this, this)
         binding.back.setOnClickListener {
-            finish()
-        }
-        binding.play.setOnClickListener {
-            when (type) {
-                // 播放音频
-                1 -> {
-                    binding.back.text = "暂停"
-                    UnityPlayer.UnitySendMessage(gameObjectName, unity3dMethodName, type.toString())
-                    mediaPlayer?.start()
-                    type++
-                }
-                // 暂停音频
-                2 -> {
-                    binding.back.text = "播放"
-                    UnityPlayer.UnitySendMessage(gameObjectName, unity3dMethodName, type.toString())
-                    mediaPlayer?.pause()
-                    type = 1
-                }
-            }
+            myUnityPlayer.quit()
+//            finish()
         }
         val cmdLine = updateUnityCommandLineArguments(intent.getStringExtra("unity"))
         intent.putExtra("unity", cmdLine)
@@ -86,6 +71,9 @@ class UnityPlayerActivity : AppCompatActivity(), IUnityPlayerLifecycleEvents {
 
                         if (line.get() != index) {
                             runAnimation(lyricInfo.song_lines[index].content)
+                            UnityPlayer.UnitySendMessage(gameObjectName,
+                                unity3dMethodName,
+                                lyricInfo.song_lines[index].content)
                             line.set(index)
                         }
                     }
@@ -176,27 +164,25 @@ class UnityPlayerActivity : AppCompatActivity(), IUnityPlayerLifecycleEvents {
     override fun onStart() {
         super.onStart()
         if (!MultiWindowSupport.getAllowResizableWindow(this))
-            return;
+            return
 
         myUnityPlayer.resume()
     }
 
     override fun onResume() {
         super.onResume()
+        mediaPlayer?.start()
         if (MultiWindowSupport.getAllowResizableWindow(this))
-            return;
+            return
         myUnityPlayer.resume()
     }
 
     override fun onPause() {
         super.onPause()
-        mediaPlayer?.stop()
-        visualizer?.release()
-        mediaPlayer?.release()
-        mediaPlayer = null
+        mediaPlayer?.pause()
         if (MultiWindowSupport.getAllowResizableWindow(this))
-            return;
-        myUnityPlayer.destroy()
+            return
+        myUnityPlayer.pause()
     }
 
     override fun onStop() {
@@ -204,11 +190,15 @@ class UnityPlayerActivity : AppCompatActivity(), IUnityPlayerLifecycleEvents {
         if (!MultiWindowSupport.getAllowResizableWindow(this))
             return;
 
-        myUnityPlayer.destroy();
+        myUnityPlayer.pause();
     }
 
 
     override fun onDestroy() {
+        mediaPlayer?.stop()
+        visualizer?.release()
+        mediaPlayer?.release()
+        mediaPlayer = null
         myUnityPlayer.destroy()
         super.onDestroy()
     }
