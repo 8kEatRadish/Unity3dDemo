@@ -36,10 +36,10 @@ class Unity3dUtil {
         imageHeight = (int) Math.ceil(textHeight);
 
         // 生成图片
-        Bitmap bitmap = Bitmap.createBitmap(imageWidth, imageHeight, Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = Bitmap.createBitmap(imageWidth * 3, imageHeight, Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(bitmap);
         canvas.drawColor(textColor == 1 ? 0xff000000 : 0xffffffff);
-        canvas.drawText(text, 0f, textHeight - 20, textPaint);
+        canvas.drawText(text, imageWidth, textHeight - 20, textPaint);
 
         return bitmap;
     }
